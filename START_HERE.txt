@@ -1,0 +1,141 @@
+╔═══════════════════════════════════════════════════════════════════════╗
+║                    SHOPIFY PIXEL INSPECTOR                            ║
+║              GTM Custom Pixel Validation Tool                         ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+👋 WELCOME! Choose your path:
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  🆕 NEW TO THIS PROJECT?                                            │
+│                                                                      │
+│  ➜ Read: TLDR.md (2 minutes)                                       │
+│     Simple explanations, quick setup, no jargon                     │
+│                                                                      │
+│  Then: QUICK_REFERENCE.md                                           │
+│     Essential console commands on one page                          │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  🎯 WORKING ON OPTIMUM NUTRITION?                                   │
+│                                                                      │
+│  ➜ Read: GTM_CUSTOM_PIXEL_GUIDE.md                                 │
+│     Understanding why GTM Preview doesn't work                      │
+│     How to validate GTM in Custom Pixel setups                      │
+│                                                                      │
+│  Then: OPTIMUM_NUTRITION_CHECKLIST.md                               │
+│     Step-by-step testing workflow with templates                    │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  ⚡ NEED TO SET UP QUICKLY?                                         │
+│                                                                      │
+│  ➜ Read: QUICK_START.md (15 minutes)                               │
+│     Detailed setup instructions                                     │
+│                                                                      │
+│  Helper: src/browser/configHelper.js                                │
+│     Interactive configuration wizard (no manual editing!)           │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  📚 WANT COMPLETE DOCUMENTATION?                                    │
+│                                                                      │
+│  ➜ Read: README.md                                                  │
+│     Full feature documentation                                      │
+│                                                                      │
+│  Navigate: INDEX.md                                                 │
+│     Master index of all documentation                               │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  🐛 HAVING PROBLEMS?                                                │
+│                                                                      │
+│  ➜ Read: docs/TROUBLESHOOTING.md                                   │
+│     Common issues and solutions                                     │
+│                                                                      │
+│  Quick Fix: QUICK_REFERENCE.md (Troubleshooting section)            │
+└─────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════
+
+📋 WHAT IS THIS?
+
+A tool that captures and validates Google Tag Manager events on Shopify
+websites - even when GTM Preview mode doesn't work (Custom Pixel issue).
+
+Problems it solves:
+  ❌ GTM Preview doesn't work with Shopify Custom Pixels
+  ❌ Can't see what tags are firing
+  ❌ Manual console checking is tedious
+  ❌ No systematic validation approach
+
+What it does:
+  ✅ Automatically captures console events
+  ✅ Records all clicks and interactions
+  ✅ Sends data to Google Sheets
+  ✅ Generates validation reports
+
+═══════════════════════════════════════════════════════════════════════
+
+⚡ 30-SECOND QUICKSTART
+
+1. Deploy webhook: https://script.google.com/ (see QUICK_START.md)
+2. Copy webhook URL
+3. Configure: Use src/browser/configHelper.js OR edit devtoolsSnippet.js
+4. Run snippet in browser DevTools
+5. Events automatically captured!
+
+Full instructions: TLDR.md or QUICK_START.md
+
+═══════════════════════════════════════════════════════════════════════
+
+🎓 SKILL-LEVEL GUIDE
+
+Beginner:
+  1. TLDR.md (understand what this does)
+  2. QUICK_START.md (set it up)
+  3. QUICK_REFERENCE.md (use it)
+
+Intermediate:
+  1. GTM_CUSTOM_PIXEL_GUIDE.md (understand GTM Custom Pixel)
+  2. OPTIMUM_NUTRITION_CHECKLIST.md (test systematically)
+  3. README.md (advanced features)
+
+Advanced:
+  1. docs/ARCHITECTURE.md (how it works)
+  2. docs/DEPLOYMENT.md (production deployment)
+  3. src/ files (customize code)
+
+═══════════════════════════════════════════════════════════════════════
+
+📞 SUPPORT
+
+Can't find what you need?
+  ➜ Check INDEX.md for master navigation
+  ➜ Search docs/ folder for specific topics
+  ➜ Review TROUBLESHOOTING.md for common issues
+
+═══════════════════════════════════════════════════════════════════════
+
+🎯 RECOMMENDED READING ORDER
+
+For Optimum Nutrition Project:
+  1. TLDR.md (2 min) - Get oriented
+  2. GTM_CUSTOM_PIXEL_GUIDE.md (15 min) - Understand the problem
+  3. QUICK_START.md (15 min) - Set up the tool
+  4. QUICK_REFERENCE.md (5 min) - Learn commands
+  5. OPTIMUM_NUTRITION_CHECKLIST.md (30 min) - Test systematically
+  6. Generate reports in Google Sheets
+
+Total time to working system: ~1 hour
+
+═══════════════════════════════════════════════════════════════════════
+
+🚀 YOU'RE READY!
+
+Start with: TLDR.md
+
+Questions? Everything is documented. Use INDEX.md to navigate.
+
+Good luck! 🎉
+
+═══════════════════════════════════════════════════════════════════════
