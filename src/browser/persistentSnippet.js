@@ -22,7 +22,7 @@
 // CONFIGURATION
 // ============================================================================
 
-const WEBHOOK_URL = "https://script.google.com/a/macros/horizonmedia.com/s/AKfycbwMhl7Dd9JUhWDJmsDjWOcX9Dd89MEUfd3Tn-yMg7lxqdodV8jkULvqlugvkSTHy58E/exec";
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwgFT5ZPaVarEkeSkh-yozj4wmlx5kzmBncxnu5_Aj9ghF2cgCOr3aTxIIbHlVAndLpLA/exec";
 const SITE_NAME = "optimum-nutrition";
 
 // ============================================================================
