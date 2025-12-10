@@ -86,6 +86,22 @@ const EVENT_HEADERS = [
 // ============================================================================
 
 /**
+ * Handle CORS preflight requests
+ * @returns {Object} Response with CORS headers
+ */
+function doOptions() {
+  return ContentService.createTextOutput()
+    .setMimeType(ContentService.MimeType.JSON)
+    .setContent(JSON.stringify({ status: 'ok' }))
+    .setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400'
+    });
+}
+
+/**
  * Handle incoming POST requests
  * @param {Object} e - Event object from HTTP request
  * @returns {Object} Response object
@@ -370,6 +386,12 @@ function createResponse(code, data) {
   
   // Add CORS headers to allow cross-origin requests
   // This is critical for the browser snippet to work from any domain
+  output.setHeaders({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  });
+  
   return output;
 }
 
