@@ -91,10 +91,20 @@
     .event {
       background: white;
       margin-bottom: 8px;
-      padding: 12px;
       border-radius: 6px;
       border-left: 4px solid #ccc;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .event-header {
+      padding: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .event-header:hover {
+      background: #fafafa;
     }
     
     .event-name {
@@ -108,6 +118,23 @@
       color: #666;
       display: flex;
       gap: 8px;
+    }
+    
+    .event-details {
+      display: none;
+      padding: 12px;
+      border-top: 1px solid #f0f0f0;
+      background: #fafafa;
+      font-family: monospace;
+      font-size: 11px;
+      max-height: 200px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    .event.expanded .event-details {
+      display: block;
     }
     
     .badge {

@@ -47,6 +47,14 @@ document.getElementById('clearAllEvents').addEventListener('click', () => {
   }
 });
 
+// Toggle event expansion - make it global
+window.toggleEvent = function(id) {
+  const event = document.querySelector('[data-event-id="' + id + '"]');
+  if (event) {
+    event.classList.toggle('expanded');
+  }
+};
+
 // Update UI
 function updateUI() {
   // Update header stats
@@ -77,15 +85,24 @@ function renderEvents() {
   }
   
   container.innerHTML = recentEvents.map(event => `
-    <div class="event event-${event.color || 'gray'}">
-      <div class="event-name">${event.eventName || event.type}</div>
-      <div class="event-meta">
-        <span class="badge">${event.source}</span>
-        <span class="badge">${event.initiator}</span>
-        <span>${new Date(event.timestamp).toLocaleTimeString()}</span>
+    <div class="event event-${event.color || 'gray'}" data-event-id="${event.id}" onclick="toggleEvent('${event.id}')">
+      <div class="event-header">
+        <div class="event-name">${escapeHtml(event.eventName || event.type)}</div>
+        <div class="event-meta">
+          <span class="badge">${escapeHtml(event.source || 'Unknown')}</span>
+          <span class="badge">${escapeHtml(event.initiator || 'Unknown')}</span>
+          <span>${new Date(event.timestamp).toLocaleTimeString()}</span>
+        </div>
       </div>
+      <div class="event-details">${JSON.stringify(event, null, 2)}</div>
     </div>
   `).join('');
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text || '';
+  return div.innerHTML;
 }
 
 function renderTags() {

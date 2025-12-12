@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Tag Mapper - Full Debugger</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13px;
+      background: #f5f5f5;
+      color: #333;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .header h1 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+    .header-stats { display: flex; gap: 24px; font-size: 13px; }
+    .stat { display: flex; align-items: center; gap: 6px; }
+    .stat-value {
+      font-weight: 700;
+      background: rgba(255,255,255,0.2);
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+    .tabs {
+      display: flex;
+      background: white;
+      border-bottom: 2px solid #e0e0e0;
+      padding: 0 24px;
+    }
+    .tab {
+      padding: 14px 24px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .tab:hover { background: #f8f8f8; }
+    .tab.active { color: #667eea; border-bottom-color: #667eea; }
+    .content { flex: 1; overflow: auto; padding: 24px; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .event {
+      background: white;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border-left: 4px solid #ccc;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .event-header {
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .event-header:hover { background: #fafafa; }
+    .event-name { font-weight: 600; font-size: 14px; }
+    .event-meta {
+      font-size: 11px;
+      color: #666;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .badge {
+      background: #e0e0e0;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .event-details {
+      display: none;
+      padding: 18px;
+      border-top: 1px solid #f0f0f0;
+      background: #fafafa;
+    }
+    .event.expanded .event-details { display: block; }
+    .event-blue { border-left-color: #2196F3; }
+    .event-green { border-left-color: #4CAF50; }
+    .event-purple { border-left-color: #9C27B0; }
+    .event-orange { border-left-color: #FF9800; }
+    .event-red { border-left-color: #f44336; }
+    .event-teal { border-left-color: #009688; }
+    .event-indigo { border-left-color: #3F51B5; }
+    .data-tree {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: #667eea; color: white; }
+    .btn-primary:hover { background: #5568d3; }
+    .btn-secondary { background: #e0e0e0; color: #333; }
+    .btn-secondary:hover { background: #d0d0d0; }
+    .search {
+      flex: 1;
+      min-width: 250px;
+      padding: 10px 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .stat-card-title {
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .stat-card-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    .tag-list {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .tag-item {
+      padding: 14px 18px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tag-item:last-child { border-bottom: none; }
+    .tag-name { font-weight: 500; font-size: 14px; }
+    .tag-count {
+      background: #667eea;
+      color: white;
+      padding: 5px 14px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .journey-item {
+      background: white;
+      padding: 18px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+    .journey-url {
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    .journey-title { color: #666; font-size: 13px; }
+    .journey-time { color: #999; font-size: 11px; margin-top: 6px; }
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: #999;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="header">
+      <h1>🔍 Tag Mapper - Full Debugger</h1>
+      <div class="header-stats">
+        <div class="stat">
+          <span>Events:</span>
+          <span class="stat-value" id="totalEvents">0</span>
+        </div>
+        <div class="stat">
+          <span>Network:</span>
+          <span class="stat-value" id="networkCount">0</span>
+        </div>
+        <div class="stat">
+          <span>Clicks:</span>
+          <span class="stat-value" id="clickCount">0</span>
+        </div>
+        <div class="stat">
+          <span>Exported:</span>
+          <span class="stat-value" id="exportedCount">0</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="tabs">
+      <div class="tab active" data-tab="timeline">📊 Timeline</div>
+      <div class="tab" data-tab="tagmap">🏷️ Tag Map</div>
+      <div class="tab" data-tab="network">🌐 Network</div>
+      <div class="tab" data-tab="variables">📋 Variables</div>
+      <div class="tab" data-tab="journey">🗺️ Journey</div>
+    </div>
+    
+    <div class="content">
+      <div class="tab-panel active" id="timeline">
+        <div class="controls">
+          <input type="text" class="search" id="searchEvents" placeholder="Search events...">
+          <button class="btn btn-secondary" onclick="clearEvents()">Clear</button>
+          <button class="btn btn-primary" onclick="refreshData()">Refresh</button>
+        </div>
+        <div id="eventsList"></div>
+      </div>
+      
+      <div class="tab-panel" id="tagmap">
+        <div class="stats-grid" id="statsGrid"></div>
+        <h3 style="margin: 24px 0 16px; font-size: 18px;">Tags Detected</h3>
+        <div class="tag-list" id="tagList"></div>
+      </div>
+      
+      <div class="tab-panel" id="network">
+        <div class="controls">
+          <input type="text" class="search" id="searchNetwork" placeholder="Search network requests...">
+        </div>
+        <div id="networkList"></div>
+      </div>
+      
+      <div class="tab-panel" id="variables">
+        <h3 style="margin-bottom: 20px; font-size: 18px;">Current DataLayer State</h3>
+        <div style="background: white; padding: 24px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+          <pre class="data-tree" id="dataLayerState">{}</pre>
+        </div>
+      </div>
+      
+      <div class="tab-panel" id="journey">
+        <h3 style="margin-bottom: 20px; font-size: 18px;">User Journey</h3>
+        <div id="journeyList"></div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="debugger.js"></script>
+</body>
+</html>
