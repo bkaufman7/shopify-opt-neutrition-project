@@ -237,7 +237,8 @@
   // ============================================================================
   
   function interceptDataLayer() {
-    if (typeof window.dataLayer !== 'undefined') {
+    // Intercept if dataLayer already exists
+    if (typeof window.dataLayer !== 'undefined' && Array.isArray(window.dataLayer)) {
       State.originalDataLayerPush = window.dataLayer.push;
       
       window.dataLayer.push = function(...args) {
@@ -262,7 +263,8 @@
         return result;
       };
       
-      if (window.dataLayer && window.dataLayer.length > 0) {
+      // Capture existing items
+      if (window.dataLayer.length > 0) {
         window.dataLayer.forEach((item) => {
           if (typeof item === 'object') {
             Object.assign(State.dataLayerState, item);
@@ -270,7 +272,50 @@
         });
       }
       
-      log('dataLayer intercepted');
+      log('dataLayer intercepted (found existing)');
+    } else {
+      // Set up proxy to intercept when dataLayer is created
+      let dataLayerValue = window.dataLayer;
+      
+      Object.defineProperty(window, 'dataLayer', {
+        get() {
+          return dataLayerValue;
+        },
+        set(newValue) {
+          dataLayerValue = newValue;
+          
+          if (Array.isArray(newValue) && !State.originalDataLayerPush) {
+            State.originalDataLayerPush = newValue.push;
+            
+            newValue.push = function(...args) {
+              const result = State.originalDataLayerPush.apply(newValue, args);
+              
+              args.forEach(arg => {
+                if (typeof arg === 'object' && arg !== null) {
+                  Object.assign(State.dataLayerState, arg);
+                  
+                  captureEvent({
+                    type: 'dataLayer',
+                    category: 'dataLayerPush',
+                    eventName: arg.event || 'dataLayer.push',
+                    eventData: JSON.parse(JSON.stringify(arg)),
+                    source: 'dataLayer.push',
+                    initiator: detectInitiator(),
+                    color: 'blue'
+                  });
+                }
+              });
+              
+              return result;
+            };
+            
+            log('dataLayer intercepted (via proxy)');
+          }
+        },
+        configurable: true
+      });
+      
+      log('dataLayer proxy set up');
     }
   }
   
@@ -397,11 +442,15 @@
         const element = e.target;
         const tagName = element.tagName ? element.tagName.toLowerCase() : '';
         
-        if (tagName === 'a' || tagName === 'button' || element.onclick) {
-          const clickText = (element.innerText || element.textContent || '').trim().substring(0, 200);
-          const clickUrl = element.href || element.getAttribute('data-href') || null;
+        // Capture clicks on links, buttons, or any clickable element
+        if (tagName === 'a' || tagName === 'button' || element.onclick || 
+            element.getAttribute('role') === 'button' || 
+            element.style.cursor === 'pointer') {
           
-          captureEvent({
+          const clickText = (element.innerText || element.textContent || element.getAttribute('aria-label') || '').trim().substring(0, 200);
+          const clickUrl = element.href || element.getAttribute('data-href') || element.getAttribute('href') || null;
+          
+          const clickEvent = {
             type: 'interaction',
             category: 'click',
             eventName: 'click',
@@ -410,14 +459,18 @@
               click_url: clickUrl,
               click_id: element.id || null,
               click_class: element.className || null,
-              click_tag: tagName
+              click_tag: tagName,
+              click_path: getElementPath(element)
             },
             source: 'DOM click listener',
             initiator: 'User Interaction',
             color: 'teal'
-          });
+          };
           
+          captureEvent(clickEvent);
           State.stats.clicks++;
+          
+          log('Click captured:', clickText || clickUrl || tagName);
         }
       } catch (error) {
         logError('Error in click listener:', error);
@@ -425,6 +478,25 @@
     }, true);
     
     log('Click listener attached');
+  }
+  
+  function getElementPath(element) {
+    const path = [];
+    let current = element;
+    while (current && current !== document.body) {
+      let selector = current.tagName.toLowerCase();
+      if (current.id) {
+        selector += '#' + current.id;
+        path.unshift(selector);
+        break;
+      } else if (current.className) {
+        selector += '.' + current.className.split(' ').join('.');
+      }
+      path.unshift(selector);
+      current = current.parentElement;
+      if (path.length > 5) break; // Limit path length
+    }
+    return path.join(' > ');
   }
   
   function capturePageView() {
@@ -532,15 +604,22 @@
     
     log('Initializing Tag Mapper Extension on:', window.location.href);
     
-    // Save original methods
+    // Save original methods FIRST before any interception
     State.originalConsole.log = console.log;
+    State.originalConsole.error = console.error;
     
     // Intercept everything
     interceptConsole();
     interceptDataLayer();
     interceptFetch();
     interceptXHR();
-    attachClickListener();
+    
+    // Attach click listener immediately if DOM is ready
+    if (document.readyState !== 'loading') {
+      attachClickListener();
+    } else {
+      document.addEventListener('DOMContentLoaded', attachClickListener);
+    }
     
     // Capture initial pageview
     capturePageView();
@@ -557,11 +636,17 @@
                 'color: green; font-weight: bold; font-size: 14px;');
     console.log('%c🔍 Tracking all tags, pixels, and events across domains...', 
                 'color: blue; font-weight: bold;');
+    console.log('%c   • Console events: ' + (State.originalConsole.log ? '✓' : '✗'), 'color: #666;');
+    console.log('%c   • DataLayer: ' + (window.dataLayer ? '✓ detected' : '○ watching'), 'color: #666;');
+    console.log('%c   • Network: ✓', 'color: #666;');
+    console.log('%c   • Clicks: ' + (document.readyState !== 'loading' ? '✓' : '○ pending'), 'color: #666;');
     
     // Notify background script
     chrome.runtime.sendMessage({
       action: 'contentScriptReady',
       url: window.location.href
+    }).catch(() => {
+      // Background script not ready yet, that's okay
     });
   }
   
