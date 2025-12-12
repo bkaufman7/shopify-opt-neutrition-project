@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Tag Mapper Debugger</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      width: 600px;
+      min-height: 400px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13px;
+      background: #f5f5f5;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 20px;
+    }
+    
+    .header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .header-stats {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+    }
+    
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .stat-value {
+      font-weight: 700;
+      background: rgba(255,255,255,0.2);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    
+    .tabs {
+      display: flex;
+      background: white;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 12px;
+      cursor: pointer;
+      text-align: center;
+      font-weight: 500;
+      transition: all 0.2s;
+      border-bottom: 3px solid transparent;
+    }
+    
+    .tab:hover {
+      background: #f8f8f8;
+    }
+    
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+    
+    .content {
+      padding: 16px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    
+    .tab-panel {
+      display: none;
+    }
+    
+    .tab-panel.active {
+      display: block;
+    }
+    
+    .event {
+      background: white;
+      margin-bottom: 8px;
+      padding: 12px;
+      border-radius: 6px;
+      border-left: 4px solid #ccc;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .event-name {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    
+    .event-meta {
+      font-size: 11px;
+      color: #666;
+      display: flex;
+      gap: 8px;
+    }
+    
+    .badge {
+      background: #e0e0e0;
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-size: 10px;
+    }
+    
+    .event-blue { border-left-color: #2196F3; }
+    .event-green { border-left-color: #4CAF50; }
+    .event-purple { border-left-color: #9C27B0; }
+    .event-teal { border-left-color: #009688; }
+    .event-indigo { border-left-color: #3F51B5; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    
+    .stat-card-title {
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    
+    .stat-card-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #5568d3;
+    }
+    
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+    
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+    
+    .status {
+      background: #4CAF50;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔍 Tag Mapper Debugger</h1>
+    <div class="header-stats">
+      <div class="stat">
+        <span>Events:</span>
+        <span class="stat-value" id="totalEvents">0</span>
+      </div>
+      <div class="stat">
+        <span>Network:</span>
+        <span class="stat-value" id="networkCount">0</span>
+      </div>
+      <div class="stat">
+        <span>Active Tabs:</span>
+        <span class="stat-value" id="tabCount">0</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="tabs">
+    <div class="tab active" data-tab="overview">Overview</div>
+    <div class="tab" data-tab="events">Events</div>
+    <div class="tab" data-tab="tags">Tags</div>
+  </div>
+  
+  <div class="content">
+    <!-- Overview Tab -->
+    <div class="tab-panel active" id="overview">
+      <div class="status">✓ Extension Active</div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-title">Total Events</div>
+          <div class="stat-card-value" id="totalEventsCard">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-title">Network Requests</div>
+          <div class="stat-card-value" id="networkCountCard">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-title">Clicks</div>
+          <div class="stat-card-value" id="clicksCard">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-title">Pageviews</div>
+          <div class="stat-card-value" id="pageviewsCard">0</div>
+        </div>
+      </div>
+      
+      <div class="controls" style="margin-top: 16px;">
+        <button class="btn btn-primary" id="openFullDebugger">Open Full Debugger</button>
+        <button class="btn btn-secondary" id="clearAllEvents">Clear All</button>
+      </div>
+      
+      <div style="margin-top: 16px; padding: 12px; background: #fff3cd; border-radius: 6px; font-size: 12px;">
+        <strong>💡 Tip:</strong> This extension tracks tags across ALL domains. Navigate to any website and it will automatically capture all tracking events!
+      </div>
+    </div>
+    
+    <!-- Events Tab -->
+    <div class="tab-panel" id="events">
+      <div id="eventsList"></div>
+    </div>
+    
+    <!-- Tags Tab -->
+    <div class="tab-panel" id="tags">
+      <div id="tagsList"></div>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
